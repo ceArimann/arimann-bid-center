@@ -208,13 +208,21 @@ function updateBidStatus_(ss, bidId, newStatus) {
   var ws = ss.getSheetByName('Bids');
   if (!ws) return { error: 'Bids sheet not found' };
 
+  var normalizedBidId = String(bidId || '').trim();
+  if (!normalizedBidId) return { error: 'Bid ID is required' };
+
+  var normalizedStatus = String(newStatus || '').trim();
+  if (!normalizedStatus) return { error: 'Status is required' };
+
   var data = ws.getDataRange().getValues();
   for (var r = 1; r < data.length; r++) {
-    if (data[r][0] === bidId) {
-      ws.getRange(r + 1, 10).setValue(newStatus); // Column J = Status
-      return { success: true, bidId: bidId, newStatus: newStatus };
+    var rowBidId = String(data[r][0] || '').trim();
+    if (rowBidId === normalizedBidId) {
+      ws.getRange(r + 1, 10).setValue(normalizedStatus); // Column J = Status
+      SpreadsheetApp.flush();
+      return { success: true, bidId: normalizedBidId, newStatus: normalizedStatus, row: r + 1 };
     }
   }
 
-  return { error: 'Bid not found: ' + bidId };
+  return { error: 'Bid not found: ' + normalizedBidId };
 }
