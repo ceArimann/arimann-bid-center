@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
+
+:root {
+  --navy-800: #0F172A;
+  --navy-500: #1E3A5F;
+  --gold-400: #F5B731;
+  --blue-500: #3B82F6;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #F1F5F9;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* Table row hover */
+.bid-row:hover { background: #FAFBFC; }
+
+/* Pipeline card hover */
+.pipe-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+/* Nav button hover */
+.nav-btn:hover { background: rgba(59,130,246,0.08); color: #94A3B8; }
+.nav-btn.active:hover { background: rgba(59,130,246,0.15); color: #60A5FA; }
