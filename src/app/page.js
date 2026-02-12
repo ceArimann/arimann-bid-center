@@ -77,6 +77,7 @@ function BidCenter() {
   const [savedView, setSavedView] = useState('all');
   const [sortBy, setSortBy] = useState('dueAsc');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
 
   const userEmail = session?.user?.email?.toLowerCase() || '';
 
@@ -240,11 +241,34 @@ function BidCenter() {
   };
 
   const handleStatusUpdate = async (bidId, newStatus) => {
-    await updateBidStatus(bidId, newStatus);
-    loadBids();
+    if (!bidId || savingStatus) return;
+
+    setSavingStatus(true);
+
+    const previousBids = bids;
+    setBids((prev) => prev.map((b) => (b.id === bidId ? { ...b, status: newStatus } : b)));
     if (sel?.id === bidId) {
       setSel((prev) => (prev ? { ...prev, status: newStatus } : prev));
     }
+
+    const result = await updateBidStatus(bidId, newStatus);
+
+    if (result?.error) {
+      setBids(previousBids);
+      if (sel?.id === bidId) {
+        const original = previousBids.find((b) => b.id === bidId);
+        if (original) setSel(original);
+      }
+      alert(`Could not update status: ${result.error}`);
+      setSavingStatus(false);
+      return;
+    }
+
+    setTimeout(() => {
+      loadBids();
+    }, 700);
+
+    setSavingStatus(false);
   };
 
   const clearFilters = () => {
@@ -598,10 +622,10 @@ function BidCenter() {
                     <button
                       key={status}
                       onClick={() => handleStatusUpdate(sel.id, status)}
-                      disabled={status === sel.status}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors ${status === sel.status ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-default' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                      disabled={status === sel.status || savingStatus}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors ${status === sel.status || savingStatus ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-default' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     >
-                      {status}
+                      {savingStatus && status === sel.status ? 'Saving...' : status}
                     </button>
                   ))}
                 </div>
@@ -613,7 +637,7 @@ function BidCenter() {
                 {sel.rfpUrl && <a href={sel.rfpUrl} target="_blank" rel="noreferrer" className="block text-center py-2.5 rounded-lg border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50">View RFP</a>}
                 {sel.draftUrl && <a href={sel.draftUrl} target="_blank" rel="noreferrer" className="block text-center py-2.5 rounded-lg border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50">Open Draft</a>}
                 {!isStatusClosable(sel.status) && sel.status !== 'Submitted' && (
-                  <button onClick={() => handleStatusUpdate(sel.id, 'Submitted')} className="py-2.5 rounded-lg bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700">Mark Submitted</button>
+                  <button disabled={savingStatus} onClick={() => handleStatusUpdate(sel.id, 'Submitted')} className="py-2.5 rounded-lg bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700 disabled:opacity-50">{savingStatus ? 'Saving...' : 'Mark Submitted'}</button>
                 )}
               </div>
             </div>
