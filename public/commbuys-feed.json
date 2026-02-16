@@ -1,26 +1,29 @@
-[
-  {
-    "bid_number": "COMMBUYS-2026-001",
-    "description": "Janitorial Services for Municipal Buildings",
-    "agency": "City of Cambridge",
-    "due_date": "2026-03-05",
-    "status": "Open",
-    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-001"
-  },
-  {
-    "bid_number": "COMMBUYS-2026-002",
-    "description": "Custodial Contract for Public Library Facilities",
-    "agency": "Town of Framingham",
-    "due_date": "2026-03-08",
-    "status": "Open",
-    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-002"
-  },
-  {
-    "bid_number": "COMMBUYS-2026-003",
-    "description": "School District Cleaning Supplies and Services",
-    "agency": "Worcester Public Schools",
-    "due_date": "2026-02-20",
-    "status": "Closed",
-    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-003"
-  }
-]
+{
+  "bids": [
+    {
+      "bid_number": "BD-26-1143-PRO15-PRO15-122938",
+      "description": "Janitorial Services at Brockton Public Safety Building",
+      "agency": "City of Brockton",
+      "due_date": "2025-12-22",
+      "buyer": "Leandro DaRosa",
+      "status": "Open"
+    },
+    {
+      "bid_number": "BD-26-1142-143-143-122760",
+      "description": "China Trade Center Janitorial Services",
+      "agency": "City of Boston",
+      "due_date": "2025-12-04",
+      "buyer": "City Record Admin",
+      "status": "Open"
+    },
+    {
+      "bid_number": "BD-26-1168-COTBD-COTBD-122416",
+      "description": "Janitorial Services for PSC",
+      "agency": "City of Taunton",
+      "due_date": "2025-11-24",
+      "buyer": "Shab Khan",
+      "status": "Open"
+    }
+  ],
+  "updatedAt": "2026-02-16T16:45:00Z"
+}
