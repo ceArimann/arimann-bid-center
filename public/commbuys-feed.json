@@ -6,7 +6,8 @@
       "agency": "City of Brockton",
       "due_date": "2025-12-22",
       "buyer": "Leandro DaRosa",
-      "status": "Open"
+      "status": "Open",
+      "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=BD-26-1143-PRO15-PRO15-122938"
     },
     {
       "bid_number": "BD-26-1142-143-143-122760",
@@ -14,7 +15,8 @@
       "agency": "City of Boston",
       "due_date": "2025-12-04",
       "buyer": "City Record Admin",
-      "status": "Open"
+      "status": "Open",
+      "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=BD-26-1142-143-143-122760"
     },
     {
       "bid_number": "BD-26-1168-COTBD-COTBD-122416",
@@ -22,7 +24,8 @@
       "agency": "City of Taunton",
       "due_date": "2025-11-24",
       "buyer": "Shab Khan",
-      "status": "Open"
+      "status": "Open",
+      "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=BD-26-1168-COTBD-COTBD-122416"
     }
   ],
   "updatedAt": "2026-02-16T16:45:00Z"
