@@ -1,32 +1,8 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-
-const CONFIG_PATHS = [
-  '/Users/carlitoengerman/.openclaw/workspace/secrets/bid-center-config.json',
-  path.resolve(process.cwd(), '../secrets/bid-center-config.json'),
-  path.resolve(process.cwd(), 'secrets/bid-center-config.json'),
-];
-
-async function getAppsScriptUrl() {
-  if (process.env.BID_CENTER_APPS_SCRIPT_URL) return process.env.BID_CENTER_APPS_SCRIPT_URL;
-
-  for (const configPath of CONFIG_PATHS) {
-    try {
-      const content = await fs.readFile(configPath, 'utf8');
-      const parsed = JSON.parse(content);
-      if (parsed.apps_script_url) return parsed.apps_script_url;
-    } catch {
-      // try next location
-    }
-  }
-
-  return null;
-}
+import { createBid } from '@/lib/google-sheets';
 
 function mapBidToSheetsPayload(bid = {}, defaultStatus = 'New') {
   return {
-    action: 'addBid',
     bidName: bid.description || bid.title || 'CommBuys Bid',
     client: bid.agency || 'CommBuys',
     dueDate: bid.due_date || '',
@@ -51,30 +27,10 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: 'Missing bid payload' }, { status: 400 });
     }
 
-    const appsScriptUrl = await getAppsScriptUrl();
-    if (!appsScriptUrl) {
-      return NextResponse.json(
-        { success: false, error: 'Apps Script URL not configured' },
-        { status: 500 }
-      );
-    }
-
     const payload = mapBidToSheetsPayload(bid, status);
+    const created = await createBid(payload);
 
-    const res = await fetch(appsScriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data?.error) {
-      throw new Error(data?.error || `Apps Script error (${res.status})`);
-    }
-
-    return NextResponse.json({ success: true, result: data });
+    return NextResponse.json({ success: true, bid: created });
   } catch (error) {
     console.error('Failed to approve CommBuys bid:', error);
     return NextResponse.json(

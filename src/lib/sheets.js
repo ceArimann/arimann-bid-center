@@ -1,5 +1,3 @@
-const API_URL = process.env.NEXT_PUBLIC_SHEETS_API_URL || 'https://script.google.com/macros/s/AKfycbxaL6B4j3DhM9U4HUKhre4R4BLdkUOJP33uyRs4eEBtb3GYmHP9KJTEeNJc_yvlZWVV/exec';
-
 export const STATUS_OPTIONS = ['New', 'Reviewing', 'Submitted', 'Won', 'Lost', 'Archived'];
 
 const LEGACY_STATUS_MAP = {
@@ -28,22 +26,25 @@ function normalizeBid(b = {}) {
   };
 }
 
-async function post(payload) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
+async function parseJsonResponse(res) {
+  let data = {};
+  try {
+    data = await res.json();
+  } catch {
+    // ignore json parse errors
+  }
+
+  if (!res.ok || data?.error) {
+    throw new Error(data?.error || `Request failed (${res.status})`);
+  }
+
   return data;
 }
 
 export async function fetchBids() {
   try {
-    const res = await fetch(`${API_URL}?action=bids`, { cache: 'no-store' });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    const res = await fetch('/api/bids', { cache: 'no-store' });
+    const data = await parseJsonResponse(res);
     return (data.bids || []).map(normalizeBid);
   } catch (err) {
     console.error('Failed to fetch bids:', err);
@@ -52,26 +53,45 @@ export async function fetchBids() {
 }
 
 export async function fetchStats() {
-  try {
-    const res = await fetch(`${API_URL}?action=stats`, { cache: 'no-store' });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
-  } catch (err) {
-    console.error('Failed to fetch stats:', err);
-    return { active: 0, dueIn7: 0, atRisk: 0, won: 0, lost: 0, winRate: 0, total: 0 };
-  }
+  const bids = await fetchBids();
+  const activeStatuses = new Set(['New', 'Reviewing', 'Submitted']);
+
+  const active = bids.filter((b) => activeStatuses.has(b.status));
+  const dueIn7 = active.filter((b) => {
+    if (!b.dueDate) return false;
+    const days = Math.ceil((new Date(b.dueDate) - new Date()) / 864e5);
+    return days >= 0 && days <= 7;
+  });
+  const atRisk = dueIn7.filter((b) => b.status !== 'Submitted');
+  const won = bids.filter((b) => b.status === 'Won').length;
+  const lost = bids.filter((b) => b.status === 'Lost').length;
+
+  return {
+    active: active.length,
+    dueIn7: dueIn7.length,
+    atRisk: atRisk.length,
+    won,
+    lost,
+    winRate: won + lost > 0 ? Math.round((won / (won + lost)) * 100) : 0,
+    total: bids.length,
+  };
 }
 
 export async function addBid(bidData) {
   try {
-    return await post({
-      action: 'addBid',
-      ...bidData,
-      status: normalizeStatus(bidData.status || 'New'),
-      notes: bidData.notes || '',
-      archived: !!bidData.archived,
+    const res = await fetch('/api/bids', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...bidData,
+        status: normalizeStatus(bidData.status || 'New'),
+        notes: bidData.notes || '',
+        archived: !!bidData.archived,
+      }),
     });
+
+    await parseJsonResponse(res);
+    return { success: true };
   } catch (err) {
     console.error('Failed to add bid:', err);
     return { error: err.message };
@@ -85,28 +105,19 @@ export async function updateBidStatus(bidId, status) {
 export async function updateBidFields(bidId, fields = {}) {
   try {
     const payload = {
-      action: 'updateBid',
-      bidId,
       status: fields.status ? normalizeStatus(fields.status) : undefined,
       notes: fields.notes,
       archived: typeof fields.archived === 'boolean' ? fields.archived : undefined,
     };
 
-    try {
-      return await post(payload);
-    } catch {
-      // fallback for legacy API endpoints
-      if (payload.status) {
-        return await post({ action: 'updateStatus', bidId, status: payload.status });
-      }
-      if (typeof payload.notes === 'string') {
-        return await post({ action: 'updateNotes', bidId, notes: payload.notes });
-      }
-      if (typeof payload.archived === 'boolean') {
-        return await post({ action: 'updateArchive', bidId, archived: payload.archived });
-      }
-      return { success: true };
-    }
+    const res = await fetch(`/api/bids/${encodeURIComponent(bidId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    await parseJsonResponse(res);
+    return { success: true };
   } catch (err) {
     console.error('Failed to update bid:', err);
     return { error: err.message };
@@ -114,5 +125,17 @@ export async function updateBidFields(bidId, fields = {}) {
 }
 
 export async function setBidArchived(bidId, archived) {
-  return updateBidFields(bidId, { archived, status: archived ? 'Archived' : 'Reviewing' });
+  try {
+    const res = await fetch(`/api/bids/${encodeURIComponent(bidId)}/archive`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archived }),
+    });
+
+    await parseJsonResponse(res);
+    return { success: true };
+  } catch (err) {
+    console.error('Failed to update archive state:', err);
+    return { error: err.message };
+  }
 }
