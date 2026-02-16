@@ -47,7 +47,16 @@ let sheetsClientPromise;
 
 async function loadServiceAccountCredentials() {
   if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    return JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+    let jsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+    // Try base64 decoding first
+    try {
+      const decoded = Buffer.from(jsonStr, 'base64').toString('utf8');
+      JSON.parse(decoded); // Verify it's valid JSON
+      jsonStr = decoded;
+    } catch {
+      // Not base64, use as-is
+    }
+    return JSON.parse(jsonStr);
   }
 
   for (const filePath of SERVICE_ACCOUNT_PATHS) {
