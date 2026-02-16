@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_SHEETS_API_URL || '';
+const API_URL = process.env.NEXT_PUBLIC_SHEETS_API_URL || 'https://script.google.com/macros/s/AKfycbxaL6B4j3DhM9U4HUKhre4R4BLdkUOJP33uyRs4eEBtb3GYmHP9KJTEeNJc_yvlZWVV/exec';
 
 export const STATUS_OPTIONS = ['New', 'Reviewing', 'Submitted', 'Won', 'Lost', 'Archived'];
 
