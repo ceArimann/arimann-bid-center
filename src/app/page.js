@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import AuthProvider from '@/components/AuthProvider';
+import CommBuysFeed from '@/components/CommBuysFeed';
 import { fetchBids, addBid as apiAddBid, updateBidStatus } from '@/lib/sheets';
 
 // ─── Status config ───
@@ -161,7 +162,7 @@ function BidCenter() {
           </div>
         </div>
         <div className="p-3">
-          {[['dashboard', 'Dashboard'], ['pipeline', 'Pipeline'], ['bids', 'All Bids'], ['calendar', 'Calendar']].map(([id, label]) => (
+          {[['dashboard', 'Dashboard'], ['pipeline', 'Pipeline'], ['bids', 'All Bids'], ['commbuys', 'CommBuys Feed'], ['calendar', 'Calendar']].map(([id, label]) => (
             <button key={id} onClick={() => { setView(id); setSel(null); }} className={`nav-btn flex items-center gap-2.5 w-full py-2 px-3 rounded-lg text-[13px] mb-0.5 text-left transition-colors ${view === id ? 'active bg-blue-500/15 text-blue-400 font-semibold' : 'text-slate-400'}`}>
               {label}
             </button>
@@ -195,7 +196,7 @@ function BidCenter() {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center px-6 py-4 bg-white border-b border-slate-200 shrink-0">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900">{view === 'dashboard' ? 'Dashboard' : view === 'pipeline' ? 'Pipeline' : view === 'bids' ? 'All Bids' : 'Calendar'}</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">{view === 'dashboard' ? 'Dashboard' : view === 'pipeline' ? 'Pipeline' : view === 'bids' ? 'All Bids' : view === 'commbuys' ? 'CommBuys Feed' : 'Calendar'}</h1>
             <p className="text-[12px] text-slate-500 mt-0.5">{stats.active} active bids</p>
           </div>
           <div className="flex gap-2.5 items-center">
@@ -292,6 +293,9 @@ function BidCenter() {
               {filtered.length === 0 && <div className="p-8 text-center text-slate-400 text-[13px]">No bids found.</div>}
             </div>
           )}
+
+          {/* ── COMMBUYS FEED ── */}
+          {view === 'commbuys' && <CommBuysFeed />}
 
           {/* ── CALENDAR ── */}
           {view === 'calendar' && (
