@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs/promises';
+import path from 'path';
 
-// Tailscale IP of Mac mini (permanent, no tunnel needed)
-const API_BASE_URL = process.env.COMMBUYS_API_URL || 'http://100.73.130.114:8765';
+// Read from public folder (committed to repo)
+// This file is updated by the scraper running on Mac mini
+const FEED_FILE = path.join(process.cwd(), 'public', 'commbuys-feed.json');
 
 function normalizeBid(raw = {}) {
   return {
@@ -17,28 +20,20 @@ function normalizeBid(raw = {}) {
 
 export async function GET() {
   try {
-    // Call the Mac mini API server via tunnel
-    const response = await fetch(`${API_BASE_URL}/api/bids`, {
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store'
-    });
+    // Read the JSON file from public folder
+    const rawText = await fs.readFile(FEED_FILE, 'utf8');
+    const json = JSON.parse(rawText);
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Normalize the bids
-    const bids = (data.bids || [])
+    // Normalize bids
+    const bids = (json.bids || [])
       .map(normalizeBid)
       .filter((b) => b.bid_number || b.description);
 
     return NextResponse.json({
       bids,
       total: bids.length,
-      sourceFile: data.sourceFile || 'via tunnel',
-      updatedAt: data.updatedAt,
+      sourceFile: 'commbuys-feed.json',
+      updatedAt: json.updatedAt || new Date().toISOString(),
     });
   } catch (error) {
     console.error('Failed to load CommBuys feed:', error);

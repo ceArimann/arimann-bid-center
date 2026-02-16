@@ -1,0 +1,26 @@
+[
+  {
+    "bid_number": "COMMBUYS-2026-001",
+    "description": "Janitorial Services for Municipal Buildings",
+    "agency": "City of Cambridge",
+    "due_date": "2026-03-05",
+    "status": "Open",
+    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-001"
+  },
+  {
+    "bid_number": "COMMBUYS-2026-002",
+    "description": "Custodial Contract for Public Library Facilities",
+    "agency": "Town of Framingham",
+    "due_date": "2026-03-08",
+    "status": "Open",
+    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-002"
+  },
+  {
+    "bid_number": "COMMBUYS-2026-003",
+    "description": "School District Cleaning Supplies and Services",
+    "agency": "Worcester Public Schools",
+    "due_date": "2026-02-20",
+    "status": "Closed",
+    "detail_url": "https://www.commbuys.com/bso/external/bidDetail.sdo?docId=COMMBUYS-2026-003"
+  }
+]
