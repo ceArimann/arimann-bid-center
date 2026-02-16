@@ -24,7 +24,7 @@ async function getAppsScriptUrl() {
   return null;
 }
 
-function mapBidToSheetsPayload(bid = {}) {
+function mapBidToSheetsPayload(bid = {}, defaultStatus = 'New') {
   return {
     action: 'addBid',
     bidName: bid.description || bid.title || 'CommBuys Bid',
@@ -35,7 +35,7 @@ function mapBidToSheetsPayload(bid = {}) {
     ownerName: 'Craig',
     ownerEmail: '',
     notes: `Imported from CommBuys\nBid #: ${bid.bid_number || 'N/A'}\nBuyer: ${bid.buyer || 'N/A'}\nStatus: ${bid.status || 'Open'}\nDetail: ${bid.detail_url || ''}`,
-    status: 'Open',
+    status: defaultStatus || 'New',
     bidUrl: bid.detail_url || '',
     rfpInFolderUrl: bid.detail_url || '',
   };
@@ -45,6 +45,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const bid = body?.bid;
+    const status = body?.status || 'New';
 
     if (!bid) {
       return NextResponse.json({ success: false, error: 'Missing bid payload' }, { status: 400 });
@@ -58,7 +59,7 @@ export async function POST(req) {
       );
     }
 
-    const payload = mapBidToSheetsPayload(bid);
+    const payload = mapBidToSheetsPayload(bid, status);
 
     const res = await fetch(appsScriptUrl, {
       method: 'POST',

@@ -79,7 +79,7 @@ export default function CommBuysFeed() {
       const res = await fetch('/api/commbuys/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bid }),
+        body: JSON.stringify({ bid, status: 'New' }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -130,7 +130,7 @@ export default function CommBuysFeed() {
           />
           <button
             onClick={loadFeed}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-[13px] text-slate-500 hover:bg-slate-50"
+            className="px-3 py-2.5 min-h-[42px] rounded-lg border border-slate-200 text-[13px] text-slate-500 hover:bg-slate-50"
           >
             Refresh
           </button>

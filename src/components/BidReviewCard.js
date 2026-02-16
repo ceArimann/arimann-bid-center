@@ -25,17 +25,17 @@ export default function BidReviewCard({ bid, onApprove, onReject, approving = fa
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button
           onClick={() => onApprove(bid)}
           disabled={approving}
-          className="py-2 rounded-lg bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700 disabled:opacity-50"
+          className="py-2.5 min-h-[42px] rounded-lg bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700 disabled:opacity-50"
         >
           {approving ? 'Saving...' : '✅ Approve'}
         </button>
         <button
           onClick={() => onReject(bid)}
-          className="py-2 rounded-lg border border-slate-200 text-slate-600 text-[12px] font-semibold hover:bg-slate-50"
+          className="py-2.5 min-h-[42px] rounded-lg border border-slate-200 text-slate-600 text-[12px] font-semibold hover:bg-slate-50"
         >
           ❌ Reject
         </button>
@@ -43,7 +43,7 @@ export default function BidReviewCard({ bid, onApprove, onReject, approving = fa
           href={bid.detail_url || '#'}
           target="_blank"
           rel="noreferrer"
-          className="py-2 rounded-lg border border-blue-200 text-blue-600 text-[12px] font-semibold text-center hover:bg-blue-50"
+          className="py-2.5 min-h-[42px] rounded-lg border border-blue-200 text-blue-600 text-[12px] font-semibold text-center hover:bg-blue-50"
         >
           👁️ View
         </a>

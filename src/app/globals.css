@@ -31,3 +31,10 @@ body {
 /* Nav button hover */
 .nav-btn:hover { background: rgba(59,130,246,0.08); color: #94A3B8; }
 .nav-btn.active:hover { background: rgba(59,130,246,0.15); color: #60A5FA; }
+
+/* Mobile responsive polish */
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+  button, a, input, select, textarea { min-height: 42px; }
+  .bid-row:hover { background: transparent; }
+}
