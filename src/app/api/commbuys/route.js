@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 
-// For local dev: use direct file access
-// For production (Vercel): use the tunnel URL
-const API_BASE_URL = process.env.COMMBUYS_API_URL || 'https://e3ce98e0d0385c62-108-12-206-56.serveousercontent.com';
+// Tailscale IP of Mac mini (permanent, no tunnel needed)
+const API_BASE_URL = process.env.COMMBUYS_API_URL || 'http://100.73.130.114:8765';
 
 function normalizeBid(raw = {}) {
   return {
