@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
 
-const DEFAULT_FEED_DIR = '/Users/carlitoengerman/.openclaw/workspace/commbuys-rfps';
+// For local dev: use direct file access
+// For production (Vercel): use the tunnel URL
+const API_BASE_URL = process.env.COMMBUYS_API_URL || 'https://e3ce98e0d0385c62-108-12-206-56.serveousercontent.com';
 
 function normalizeBid(raw = {}) {
   return {
@@ -16,55 +16,30 @@ function normalizeBid(raw = {}) {
   };
 }
 
-async function resolveLatestJsonFile(feedDir) {
-  const files = await fs.readdir(feedDir);
-  const jsonFiles = files
-    .filter((f) => f.toLowerCase().endsWith('.json'))
-    .map((name) => path.join(feedDir, name));
-
-  if (!jsonFiles.length) return null;
-
-  const withStats = await Promise.all(
-    jsonFiles.map(async (file) => ({
-      file,
-      stat: await fs.stat(file),
-    }))
-  );
-
-  withStats.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
-  return withStats[0].file;
-}
-
-function extractBidArray(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (payload && typeof payload === 'object') {
-    const listCandidates = ['bids', 'results', 'items', 'data'];
-    for (const key of listCandidates) {
-      if (Array.isArray(payload[key])) return payload[key];
-    }
-  }
-  return [];
-}
-
 export async function GET() {
   try {
-    const feedDir = process.env.COMMBUYS_RFPS_DIR || DEFAULT_FEED_DIR;
-    const latestFile = await resolveLatestJsonFile(feedDir);
-
-    if (!latestFile) {
-      return NextResponse.json({ bids: [], sourceFile: null, total: 0 });
+    // Call the Mac mini API server via tunnel
+    const response = await fetch(`${API_BASE_URL}/api/bids`, {
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
-
-    const rawText = await fs.readFile(latestFile, 'utf8');
-    const json = JSON.parse(rawText);
-    const bids = extractBidArray(json)
+    
+    const data = await response.json();
+    
+    // Normalize the bids
+    const bids = (data.bids || [])
       .map(normalizeBid)
       .filter((b) => b.bid_number || b.description);
 
     return NextResponse.json({
       bids,
       total: bids.length,
-      sourceFile: path.basename(latestFile),
+      sourceFile: data.sourceFile || 'via tunnel',
+      updatedAt: data.updatedAt,
     });
   } catch (error) {
     console.error('Failed to load CommBuys feed:', error);
